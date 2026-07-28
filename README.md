@@ -1,1 +1,0 @@
-# vektamd.github.io
