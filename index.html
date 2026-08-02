@@ -35,10 +35,6 @@
     max-width:420px;
     box-shadow:0 2px 8px rgba(0,0,0,0.06);
   }
-  h1{
-    font-size:20px;
-    margin:0 0 6px;
-  }
   .logo{
     margin-bottom:20px;
   }
@@ -46,6 +42,10 @@
     height:24px;
     width:auto;
     display:block;
+  }
+  h1{
+    font-size:20px;
+    margin:0 0 6px;
   }
   p.sub{
     margin:0 0 24px;
@@ -90,18 +90,6 @@
     font-weight:700;
   }
   .result-value.primary{ color:var(--accent-dark); }
-  .result-formula{
-    font-size:12px;
-    color:#a0aec0;
-    margin-top:-6px;
-    margin-bottom:6px;
-  }
-  .note{
-    margin-top:20px;
-    font-size:12px;
-    color:#a0aec0;
-    line-height:1.5;
-  }
 </style>
 </head>
 <body>
@@ -120,55 +108,73 @@
         </defs>
       </svg>
     </div>
-    <h1>Калькулятор</h1>
-    <p class="sub"></p>
+    <h1>Калькулятор зарплаты учителя</h1>
+    <p class="sub">Введите отработанные часы, чтобы рассчитать начисление</p>
 
     <label for="hours">Часы работы</label>
-    <input type="number" id="hours" min="0" step="1" placeholder="Например, 20" oninput="calculate()">
+    <input type="number" id="hours" min="0" step="0.5" placeholder="Например, 20" oninput="calculate()">
 
     <label for="rate">Ставка за час</label>
-    <input type="number" id="rate" min="0" step="1" value="rate" oninput="calculate()">
+    <input type="number" id="rate" min="0" step="1" value="200" oninput="calculate()">
 
-    <label for="commission">Комиссия Vekta</label>
-    <input type="number" id="commission" min="0" step="1" value="comission" oninput="calculate()">
+    <label for="commission">Комиссия, %</label>
+    <input type="number" id="commission" min="0" step="1" value="20" oninput="calculate()">
 
     <div class="results">
       <div class="result-item">
-        <span class="result-label">Заработная плата</span>
-        <span class="result-value" id="result-final">0</span>
-      </div>
-       <div class="result-item">
-        <span class="result-label">Всего</span>
+        <span class="result-label">Заработок учителя</span>
         <span class="result-value primary" id="result-s">0</span>
       </div>
       <div class="result-item">
-        <span class="result-label">Комиссия</span>
-        <span class="result-value" id="result-v">0</span>
+        <span class="result-label">Комиссия вывода</span>
+        <span class="result-value" id="result-mA">0</span>
       </div>
       <div class="result-item">
         <span class="result-label">Доход фаундера</span>
-        <span class="result-value" id="result-founder">0</span>
+        <span class="result-value" id="result-m">0</span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">Бюджет рекламы</span>
+        <span class="result-value" id="result-t">0</span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">Доход фаундера после бюджета</span>
+        <span class="result-value" id="result-mT">0</span>
       </div>
     </div>
   </div>
 
 <script>
   function calculate() {
-    const hoursInput = document.getElementById('hours').value;
-    const x = parseFloat(hoursInput) || 0;
-    const rateInput = document.getElementById('rate').value;
-    const rate = parseFloat(rateInput) || 0;
-    const commissionInput = document.getElementById('commission').value;
-    const commission = parseFloat(commissionInput) || 0;
-    const s = x * rate;
-    const final = s - x * commission;
-    const v = s - final;
-    const founder = v / 2;
+    const h = parseFloat(document.getElementById('hours').value) || 0;
+    const MpH = parseFloat(document.getElementById('rate').value) || 0;
+    const cInput = parseFloat(document.getElementById('commission').value) || 0;
+
+    const gross = MpH * h;
+
+    // c — комиссия ввода, в процентах от валовой суммы
+    const c = gross * (cInput / 100);
+
+    // s — заработок учителя
+    const s = gross - c;
+
+    // mA — доход агентства (равен той же сумме, что вычтена из заработка)
+    const mA = c;
+
+    // m — доход фаундера
+    const m = mA * 0.5;
+
+    // t — бюджет рекламы, зависит от порога дохода агентства в 5000
+    const t = mA < 5000 ? mA * 0.2 : mA * 0.15;
+
+    // mT — доход фаундера после учёта бюджета на рекламу
+    const mT = m - t * 0.5;
 
     document.getElementById('result-s').textContent = s.toLocaleString('ru-RU');
-    document.getElementById('result-final').textContent = final.toLocaleString('ru-RU');
-    document.getElementById('result-v').textContent = v.toLocaleString('ru-RU');
-    document.getElementById('result-founder').textContent = founder.toLocaleString('ru-RU');
+    document.getElementById('result-mA').textContent = mA.toLocaleString('ru-RU');
+    document.getElementById('result-m').textContent = m.toLocaleString('ru-RU');
+    document.getElementById('result-t').textContent = t.toLocaleString('ru-RU');
+    document.getElementById('result-mT').textContent = mT.toLocaleString('ru-RU');
   }
 
   calculate();
